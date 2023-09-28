@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- <script src="script.js"></script> -->
+    
+</head>
+
+<body>
+    <div class="panel" id="container">
+        <h1>DOG IMAGES GET HERE</h1>
+        <div class="dog-div">
+            <label for="dogs"> Please Select</label>
+            <select name="dogs" id="dog-select">
+                <option value="">Select Dog Type</option>
+            </select>
+        </div>
+        <button id="fetchImage">Get dog img</button>
+        <div class="current-dog">
+            <img id="dog-image" src="" />
+        </div>
+    </div>
+    <div id="load">Loading....</div>
+
+    <script>
+        $.ajax({
+            url: 'https://dog.ceo/api/breeds/list/all',
+            type: 'GET',
+            showLoader: true,
+            success: function (response) {
+                // $('#load').hide();
+
+                if (response.status == "success") {
+                    let jsonResponse = response.message;
+                    for (let key in jsonResponse) {
+                        let breedName = key;
+                        if (jsonResponse[key].length > 0) {
+                            for (let i = 0; i < jsonResponse[key].length; i++) {
+                                let dogName = jsonResponse[key][i];
+                                $('#dog-select').append(`<option value="${breedName + '/' + dogName}">${dogName + ' ' + breedName}</option>`);
+                                console.log("Api request success");
+                            }
+                        } else {
+                            $('#dog-select').append(`<option value="${breedName}">${breedName}</option>`);
+                        }
+                    }
+                } else {
+                    alert(response.message)
+                }
+            },
+            error: function () {
+                $('#load').hide();
+                $('#container').show();
+
+
+                console.log("Api request error");
+            },
+            complete: function () {
+      console.log("API request completed");
+      $("#load").hide();
+      $("#container").show();
+    },
+        });
+        $('#fetchImage').click(getDogImage);
+        function getDogImage() {
+            let dogName = $('#dog-select').val();
+            $('#load').show();
+            $('#container').hide();
+            $.ajax({
+                url: 'https://dog.ceo/api/breed/' + dogName + '/images/random',
+                type: 'GET',
+                showLoader: true,
+                success: function (response) {
+                    $('#load').hide();
+
+                    if (response.status == "success") {
+                        $('#dog-image').attr('src', response.message);
+                        $("#dog-image").css({"height": "200px", "width": "200px"});
+                        console.log("Api request success");
+
+                    } else {
+                        alert(response.message)
+                    }
+                },
+                error: function () {
+                    console.log("Api request error");
+
+                },
+                complete: function () {
+      console.log("API request completed img");
+      $("#load").hide();
+      $("#container").show();
+    },
+            });
+        }
+    </script>
+</body>
+
+</html>
